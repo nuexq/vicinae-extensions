@@ -1,4 +1,16 @@
 import { useFetch } from "@raycast/utils";
+import { useState, useEffect } from "react";
+
+function useDebouncedValue<T>(value: T, delay = 300) {
+  const [debounced, setDebounced] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+
+  return debounced;
+}
 
 export function useSearch({
   url,
@@ -9,6 +21,8 @@ export function useSearch({
   searchText: string;
   searchSize: number;
 }) {
+  const debouncedSearchText = useDebouncedValue(searchText, 300);
+
   const queryFields = [
     "package_attr_name^9",
     "package_attr_name.*^5.4",
@@ -24,7 +38,7 @@ export function useSearch({
     "flake_name.*^0.3",
   ];
 
-  const reversedSearchText = [...searchText].reverse().join("");
+  const reversedSearchText = [...debouncedSearchText].reverse().join("");
 
   const query = {
     size: searchSize,
@@ -39,7 +53,7 @@ export function useSearch({
                 {
                   multi_match: {
                     type: "cross_fields",
-                    query: searchText,
+                    query: debouncedSearchText,
                     analyzer: "whitespace",
                     auto_generate_synonyms_phrase_query: false,
                     operator: "and",
@@ -56,7 +70,7 @@ export function useSearch({
                     fields: queryFields,
                   },
                 },
-                { wildcard: { package_attr_name: { value: `*${searchText}*` } } },
+                { wildcard: { package_attr_name: { value: `*${debouncedSearchText}*` } } },
               ],
             },
           },
@@ -99,11 +113,10 @@ export function useSearch({
       }));
     },
     initialData: [],
-    execute: Boolean(searchText.length),
+    execute: Boolean(debouncedSearchText.length),
     failureToastOptions: { title: "Could not perform search" },
-  }
-  );
+  });
 
-  return { isLoading, results: !searchText.length ? [] : data };
+  return { isLoading, results: !debouncedSearchText.length ? [] : data };
 }
 
