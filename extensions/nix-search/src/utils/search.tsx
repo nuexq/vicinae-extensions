@@ -1,7 +1,7 @@
 import { useFetch } from "@raycast/utils";
 import { getPreferenceValues } from "@vicinae/api";
 import { PkgsSearchResult } from "../search-nixpkgs";
-import { OptionsSearchResult } from "../search-nixosOptions";
+import { OptionsSearchResult } from "../search-nixos-options";
 import { SearchEnum, useDebouncedValue } from "./lib";
 
 export function useSearch({
@@ -9,43 +9,41 @@ export function useSearch({
   type,
 }: {
   searchText: string;
-  type?: SearchEnum;
+  type: SearchEnum;
 }) {
-  const debouncedSearchText = useDebouncedValue(searchText, 300);
-  const { Packages, Options } = SearchEnum;
+  const { Packages } = SearchEnum;
   const { searchSize, branchName } = getPreferenceValues<Preferences>();
+  const debouncedSearchText = useDebouncedValue(searchText, 300);
 
   const url = `https://search.nixos.org/backend/latest-44-nixos-${branchName}/_search`;
 
   const isPackageSearch = type === Packages;
-  const queryFields = isPackageSearch
-    ? [
-      "package_attr_name^9",
-      "package_attr_name.*^5.4",
-      "package_programs^9",
-      "package_programs.*^5.4",
-      "package_pname^6",
-      "package_pname.*^3.6",
-      "package_description^1.3",
-      "package_description.*^0.78",
-      "package_longDescription^1",
-      "package_longDescription.*^0.6",
-      "flake_name^0.5",
-      "flake_name.*^0.3",
-    ]
-    : [
-      "option_name^6",
-      "option_name.*^3.6",
-      "option_description^1",
-      "option_description.*^0.6",
-      "option_flake^0.5",
-      "option_flake.*^0.3",
-    ];
+  let queryFields = isPackageSearch ? [
+    "package_attr_name^9",
+    "package_attr_name.*^5.4",
+    "package_programs^9",
+    "package_programs.*^5.4",
+    "package_pname^6",
+    "package_pname.*^3.6",
+    "package_description^1.3",
+    "package_description.*^0.78",
+    "package_longDescription^1",
+    "package_longDescription.*^0.6",
+    "flake_name^0.5",
+    "flake_name.*^0.3",
+  ] : [
+    "option_name^6",
+    "option_name.*^3.6",
+    "option_description^1",
+    "option_description.*^0.6",
+    "option_flake^0.5",
+    "option_flake.*^0.3",
+  ];
 
   const reversedSearchText = [...debouncedSearchText].reverse().join("");
 
   const query = {
-    size: Math.trunc(+searchSize),
+    size: Math.max(1, Number(searchSize) || 10),
     query: {
       bool: {
         filter: [{ term: { type: { value: isPackageSearch ? "package" : "option" } } }],
@@ -138,7 +136,7 @@ export function useSearch({
       });
     },
     initialData: [],
-    execute: debouncedSearchText.length >= 2,
+    execute: debouncedSearchText.trim().length >= 2,
     failureToastOptions: { title: "Could not perform search" },
   });
 

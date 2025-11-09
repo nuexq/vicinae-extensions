@@ -3,14 +3,9 @@ import { useState } from "react";
 import { URL } from "node:url";
 import { useSearch } from "./utils/search";
 import { SearchEnum } from "./utils/lib";
-import TurndownService from "turndown";
-
-
-const turndownService = new TurndownService();
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
-
   const { isLoading, results } = useSearch({ searchText, type: SearchEnum.Packages });
 
   return (
@@ -31,8 +26,6 @@ export default function Command() {
 }
 
 function SearchListItem({ searchResult }: { searchResult: PkgsSearchResult }) {
-  console.log("before: \n", searchResult.description)
-  console.log("after: \n", searchResult.description && renderDescription(searchResult.description))
   return (
     <List.Item
       title={searchResult.attrName}
