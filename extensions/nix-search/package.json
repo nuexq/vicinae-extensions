@@ -16,6 +16,13 @@
       "subtitle": "Find package info from nixpkgs repo",
       "description": "Quickly look up nixpkgs, view metadata, maintainers, and Github source links",
       "mode": "view"
+    },
+    {
+      "name": "search-nixos-options",
+      "title": "Search NixOS Options",
+      "subtitle": "Find NixOS configuration options and their details",
+      "description": "Quickly search and explore NixOS options, view types, default values, examples, and links to declarations in nixpkgs",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -47,7 +54,8 @@
     "@vicinae/api": "^0.16.1"
   },
   "devDependencies": {
-    "typescript": "^5.9.2",
-    "@biomejs/biome": "2.3.2"
+    "@biomejs/biome": "2.3.2",
+    "turndown": "^7.2.2",
+    "typescript": "^5.9.2"
   }
 }

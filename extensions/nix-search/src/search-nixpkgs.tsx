@@ -1,14 +1,17 @@
-import { ActionPanel, Action, Color, getPreferenceValues, List, Icon } from "@vicinae/api";
+import { ActionPanel, Action, Color, List, Icon } from "@vicinae/api";
 import { useState } from "react";
 import { URL } from "node:url";
-import { useSearch } from "./utils/lib";
+import { useSearch } from "./utils/search";
+import { SearchEnum } from "./utils/lib";
+import TurndownService from "turndown";
+
+
+const turndownService = new TurndownService();
 
 export default function Command() {
-  const { searchSize, branchName } = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState("");
 
-  const url = `https://search.nixos.org/backend/latest-44-nixos-${branchName}/_search`;
-  const { isLoading, results } = useSearch({ url, searchText, searchSize: Math.trunc(+searchSize)});
+  const { isLoading, results } = useSearch({ searchText, type: SearchEnum.Packages });
 
   return (
     <List
@@ -19,7 +22,7 @@ export default function Command() {
       searchText={searchText}
     >
       <List.Section title="Results" subtitle={`${results.length}`}>
-        {results.map((searchResult: SearchResult) => (
+        {results.map((searchResult: PkgsSearchResult) => (
           <SearchListItem key={searchResult.id} searchResult={searchResult} />
         ))}
       </List.Section>
@@ -27,7 +30,9 @@ export default function Command() {
   );
 }
 
-function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
+function SearchListItem({ searchResult }: { searchResult: PkgsSearchResult }) {
+  console.log("before: \n", searchResult.description)
+  console.log("after: \n", searchResult.description && renderDescription(searchResult.description))
   return (
     <List.Item
       title={searchResult.attrName}
@@ -48,7 +53,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       }
       detail={
         <List.Item.Detail
-          markdown={`# ${searchResult.attrName}\n${searchResult.description ?? ""}`}
+          markdown={`## ${searchResult.attrName}\n\n${searchResult.description ? renderDescription(searchResult.description) : ""}`}
           metadata={
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Label title="Name" text={searchResult.name} />
@@ -97,7 +102,11 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
   );
 }
 
-export interface SearchResult {
+function renderDescription(html: string) {
+  return turndownService.turndown(html);
+}
+
+export interface PkgsSearchResult {
   id: string;
   name: string;
   attrName: string;
@@ -111,7 +120,3 @@ export interface SearchResult {
   licenses: { name: string; url: string | null }[];
 }
 
-interface Preferences {
-  searchSize: string;
-  branchName: string;
-}
