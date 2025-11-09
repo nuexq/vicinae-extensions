@@ -32,9 +32,9 @@ function SearchListItem({ searchResult }: { searchResult: OptionsSearchResult })
   const safeName = searchResult.name.replace(/</g, "&lt;").replace(/>/g, "&gt;");
   const markdown = `## ${safeName}
 
-    ${searchResult.description ? htmlToMarkdown(searchResult.description) : ""}
+${searchResult.description ? htmlToMarkdown(searchResult.description) : ""}
 
-    ${searchResult.example ? `### Example\n\`\`\`nix\n${searchResult.example}\n\`\`\`` : ""}`;
+${searchResult.example ? `### Example\n\`\`\`nix\n${searchResult.example}\n\`\`\`` : ""}`;
 
 
   return (
@@ -46,30 +46,24 @@ function SearchListItem({ searchResult }: { searchResult: OptionsSearchResult })
             <Action.CopyToClipboard
               title="Copy Option Name"
               content={searchResult.name}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
+            {searchResult.example && (
+              <Action.CopyToClipboard
+                title="Copy Example"
+                content={searchResult.example}
+              />
+            )}
           </ActionPanel.Section>
-          {searchResult.declaredIn && (
 
+          {searchResult.declaredIn && (
             <ActionPanel.Section>
               <Action.OpenInBrowser
                 title="Open Definition on GitHub"
                 url={`https://github.com/NixOS/nixpkgs/blob/nixos-25.05/${searchResult.declaredIn}`}
-                shortcut={{ modifiers: ["cmd"], key: "o" }}
               />
             </ActionPanel.Section>
           )}
-          {searchResult.example && (
-            <ActionPanel.Section>
-              <Action.CopyToClipboard
-                title="Copy Example"
-                content={searchResult.example}
-                shortcut={{ modifiers: ["cmd"], key: "e" }}
-              />
-            </ActionPanel.Section>
-          )}
-        </ActionPanel>
-      }
+        </ActionPanel>}
       detail={
         <List.Item.Detail
           markdown={markdown}
