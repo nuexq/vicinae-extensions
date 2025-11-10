@@ -11,7 +11,7 @@ export function useDebouncedValue<T>(value: T, delay = 300) {
   return debounced;
 }
 
-export enum SearchEnum {
-  Packages,
-  Options
+export interface Preferences {
+  searchSize: string;
+  branchName: string;
 }

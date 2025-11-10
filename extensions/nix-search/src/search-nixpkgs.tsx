@@ -1,12 +1,13 @@
-import { ActionPanel, Action, Color, List, Icon } from "@vicinae/api";
+import { ActionPanel, Action, Color, List, Icon, getPreferenceValues } from "@vicinae/api";
 import { useState } from "react";
 import { URL } from "node:url";
 import { useSearch } from "./utils/search";
-import { SearchEnum } from "./utils/lib";
+import { Preferences } from "./utils/lib";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
-  const { isLoading, results } = useSearch({ searchText, type: SearchEnum.Packages });
+  const { searchSize, branchName } = getPreferenceValues<Preferences>();
+  const { isLoading, results } = useSearch({ searchText, type: "packages", searchSize: Number(searchSize), branchName });
 
   return (
     <List
@@ -46,7 +47,7 @@ function SearchListItem({ searchResult }: { searchResult: PkgsSearchResult }) {
       }
       detail={
         <List.Item.Detail
-          markdown={`## ${searchResult.attrName}\n\n${searchResult.description ? renderDescription(searchResult.description) : ""}`}
+          markdown={`## ${searchResult.attrName}\n\n${searchResult.description ? searchResult.description : ""}`}
           metadata={
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Label title="Name" text={searchResult.name} />
@@ -93,10 +94,6 @@ function SearchListItem({ searchResult }: { searchResult: PkgsSearchResult }) {
       }
     />
   );
-}
-
-function renderDescription(html: string) {
-  return turndownService.turndown(html);
 }
 
 export interface PkgsSearchResult {

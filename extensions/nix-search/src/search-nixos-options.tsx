@@ -1,15 +1,15 @@
 import { useState } from "react";
-import { SearchEnum } from "./utils/lib";
+import { Preferences } from "./utils/lib";
 import { useSearch } from "./utils/search";
-import { Action, ActionPanel, List } from "@vicinae/api";
+import { Action, ActionPanel, getPreferenceValues, List } from "@vicinae/api";
 import TurndownService from "turndown";
 
 const turndownService = new TurndownService();
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
-
-  const { isLoading, results } = useSearch({ searchText, type: SearchEnum.Options });
+  const { searchSize, branchName } = getPreferenceValues<Preferences>();
+  const { isLoading, results } = useSearch({ searchText, type: "options", searchSize: Number(searchSize), branchName });
 
   return (
     <List

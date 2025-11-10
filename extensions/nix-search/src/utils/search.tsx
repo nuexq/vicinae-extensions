@@ -1,24 +1,10 @@
 import { useFetch } from "@raycast/utils";
-import { getPreferenceValues } from "@vicinae/api";
-import { PkgsSearchResult } from "../search-nixpkgs";
-import { OptionsSearchResult } from "../search-nixos-options";
-import { SearchEnum, useDebouncedValue } from "./lib";
+import { useDebouncedValue } from "./lib";
 
-export function useSearch({
-  searchText,
-  type,
-}: {
-  searchText: string;
-  type: SearchEnum;
-}) {
-  const { Packages } = SearchEnum;
-  const { searchSize, branchName } = getPreferenceValues<Preferences>();
-  const debouncedSearchText = useDebouncedValue(searchText, 300);
+type SearchType = "packages" | "options";
 
-  const url = `https://search.nixos.org/backend/latest-44-nixos-${branchName}/_search`;
-
-  const isPackageSearch = type === Packages;
-  let queryFields = isPackageSearch ? [
+const FIELDS = {
+  packages: [
     "package_attr_name^9",
     "package_attr_name.*^5.4",
     "package_programs^9",
@@ -31,64 +17,135 @@ export function useSearch({
     "package_longDescription.*^0.6",
     "flake_name^0.5",
     "flake_name.*^0.3",
-  ] : [
+  ],
+  options: [
     "option_name^6",
     "option_name.*^3.6",
     "option_description^1",
     "option_description.*^0.6",
     "option_flake^0.5",
     "option_flake.*^0.3",
-  ];
+  ],
+};
 
-  const reversedSearchText = [...debouncedSearchText].reverse().join("");
+function buildQuery({
+  text,
+  type,
+  searchSize,
+}: {
+  text: string;
+  type: SearchType;
+  searchSize: number;
+}) {
+  const reversed = [...text].reverse().join("");
+  const fields = FIELDS[type];
+  const baseWildcard = type === "packages" ? "package_attr_name" : "option_name";
 
-  const query = {
-    size: Math.max(1, Number(searchSize) || 10),
+  const multiMatch = (query: string) => ({
+    multi_match: {
+      type: "cross_fields",
+      query,
+      analyzer: "whitespace",
+      auto_generate_synonyms_phrase_query: false,
+      operator: "and",
+      fields,
+    },
+  });
+
+  return {
+    size: Math.max(1, searchSize || 10),
     query: {
       bool: {
-        filter: [{ term: { type: { value: isPackageSearch ? "package" : "option" } } }],
+        filter: [{ term: { type: { value: type === "packages" ? "package" : "option" } } }],
         must: [
           {
             dis_max: {
               tie_breaker: 0.7,
               queries: [
+                multiMatch(text),
+                multiMatch(reversed),
                 {
-                  multi_match: {
-                    type: "cross_fields",
-                    query: debouncedSearchText,
-                    analyzer: "whitespace",
-                    auto_generate_synonyms_phrase_query: false,
-                    operator: "and",
-                    fields: queryFields,
-                  },
-                },
-                {
-                  multi_match: {
-                    type: "cross_fields",
-                    query: reversedSearchText,
-                    analyzer: "whitespace",
-                    auto_generate_synonyms_phrase_query: false,
-                    operator: "and",
-                    fields: queryFields,
-                  },
-                },
-                isPackageSearch
-                  ? { wildcard: { package_attr_name: { value: `*${debouncedSearchText}*` } } }
-                  : {
-                    wildcard: {
-                      option_name: { value: `*${debouncedSearchText}*`, case_insensitive: true },
+                  wildcard: {
+                    [baseWildcard]: {
+                      value: `*${text}*`,
+                      ...(type === "options" && { case_insensitive: true }),
                     },
                   },
+                },
               ],
             },
           },
         ],
       },
     },
-    sort: isPackageSearch
-      ? [{ _score: "desc" }, { package_attr_name: "desc" }, { package_pversion: "desc" }]
-      : [{ _score: "desc" }, { option_name: "desc" }],
+    sort:
+      type === "packages"
+        ? [{ _score: "desc" }, { package_attr_name: "desc" }, { package_pversion: "desc" }]
+        : [{ _score: "desc" }, { option_name: "desc" }],
   };
+}
+
+async function parseResponse(response: Response, isPackageSearch: boolean) {
+  const json = await response.json();
+  if (!response.ok || json.error || json.code) {
+    throw new Error(json.message || json.error?.reason || response.statusText);
+  }
+
+  return json.hits.hits.map(({ _source, _id }: any) => {
+    if (isPackageSearch) {
+      const src = _source;
+      return {
+        id: _id,
+        name: src.package_pname,
+        attrName: src.package_attr_name,
+        description: src.package_description,
+        version: src.package_pversion,
+        homepage: src.package_homepage,
+        outputs: src.package_outputs,
+        defaultOutput: src.package_default_output,
+        platforms: src.package_platforms.filter((p: string) =>
+          ["x86_64-linux", "aarch64-linux", "i686-linux", "x86_64-darwin", "aarch64-darwin"].includes(p)
+        ),
+        source:
+          src.package_position &&
+          `https://github.com/NixOS/nixpkgs/blob/unstable/${src.package_position.replace(/:([0-9]+)$/, "")}`,
+        licenses: (src.package_license_set || []).map((name: string) => ({ name, url: null })),
+      };
+    }
+
+    const src = _source;
+    return {
+      id: _id,
+      name: src.option_name,
+      description: src.option_description,
+      type: src.option_type,
+      default: src.option_default,
+      declaredIn: src.option_source,
+      example: src.option_example,
+    };
+  });
+}
+
+export function useSearch({
+  searchText,
+  type,
+  searchSize,
+  branchName,
+}: {
+  searchText: string;
+  type: SearchType;
+  searchSize: number;
+  branchName: string;
+}) {
+  const debounced = useDebouncedValue(searchText, 300);
+
+  const query = buildQuery({
+    text: debounced,
+    type,
+    searchSize,
+  });
+
+  const url = `https://search.nixos.org/backend/latest-44-nixos-${branchName}/_search`;
 
   const { isLoading, data } = useFetch(url, {
     method: "POST",
@@ -97,54 +154,11 @@ export function useSearch({
       "Content-Type": "application/json",
     },
     body: JSON.stringify(query),
-    async parseResponse(response) {
-      const json = await response.json();
-
-      if ("code" in json) throw new Error(json.message);
-      if ("error" in json) throw new Error(json.error.reason);
-      if (!response.ok) throw new Error(response.statusText);
-
-      return json.hits.hits.map(({ _source, _id }: any) => {
-        if (isPackageSearch) {
-          return {
-            id: _id,
-            name: _source.package_pname,
-            attrName: _source.package_attr_name,
-            description: _source.package_description,
-            version: _source.package_pversion,
-            homepage: _source.package_homepage,
-            outputs: _source.package_outputs,
-            defaultOutput: _source.package_default_output,
-            platforms: _source.package_platforms.filter((p: string) =>
-              ["x86_64-linux", "aarch64-linux", "i686-linux", "x86_64-darwin", "aarch64-darwin"].includes(p)
-            ),
-            source:
-              _source.package_position &&
-              `https://github.com/NixOS/nixpkgs/blob/unstable/${_source.package_position.replace(/:([0-9]+)$/, "")}`,
-            licenses: (_source.package_license_set || []).map((name: string) => ({ name, url: null })),
-          } as PkgsSearchResult;
-        }
-        return {
-          id: _id,
-          name: _source.option_name,
-          description: _source.option_description,
-          type: _source.option_type,
-          default: _source.option_default,
-          declaredIn: _source.option_source,
-          example: _source.option_example,
-        } as OptionsSearchResult;
-      });
-    },
+    parseResponse: (r) => parseResponse(r, type === "packages"),
     initialData: [],
-    execute: debouncedSearchText.trim().length >= 2,
+    execute: debounced.trim().length >= 2,
     failureToastOptions: { title: "Could not perform search" },
   });
 
-  return { isLoading, results: debouncedSearchText.length ? data : [] };
+  return { isLoading, results: debounced ? data : [] };
 }
-
-interface Preferences {
-  searchSize: string;
-  branchName: string;
-}
-
