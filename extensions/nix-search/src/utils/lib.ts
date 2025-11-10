@@ -15,3 +15,13 @@ export interface Preferences {
   searchSize: string;
   branchName: string;
 }
+
+export interface OptionsSearchResult {
+  id: string;
+  name: string;
+  description: string | null;
+  type: string;
+  default: string | null;
+  declaredIn: string[] | null;
+  example: string | null;
+}

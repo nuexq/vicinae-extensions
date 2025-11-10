@@ -23,6 +23,13 @@
       "subtitle": "Find NixOS configuration options and their details",
       "description": "Quickly search and explore NixOS options, view types, default values, examples, and links to declarations in nixpkgs",
       "mode": "view"
+    },
+    {
+      "name": "search-homeManager-options",
+      "title": "Search Home-Manager Options",
+      "subtitle": "Find Home-Manager configuration options and their details",
+      "description": "Quickly search and explore Home-Manager Options, view types, default values, examples, and links to declarations in nixpkgs",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -39,7 +46,7 @@
       "description": "Branch name of NixOS/nixpkgs to query against",
       "type": "textfield",
       "required": false,
-      "title": "NixPkgs verison",
+      "title": "NixPkgs & Home-Manager verison",
       "default": "unstable"
     }
   ],

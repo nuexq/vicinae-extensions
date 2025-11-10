@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Preferences } from "./utils/lib";
+import { OptionsSearchResult, Preferences } from "./utils/lib";
 import { useSearch } from "./utils/search";
 import { Action, ActionPanel, getPreferenceValues, List } from "@vicinae/api";
 import TurndownService from "turndown";
@@ -15,7 +15,7 @@ export default function Command() {
     <List
       isLoading={isLoading}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search nix packages..."
+      searchBarPlaceholder="Search NixOS options..."
       isShowingDetail
       searchText={searchText}
     >
@@ -78,7 +78,7 @@ ${searchResult.example ? `### Example\n\`\`\`nix\n${searchResult.example}\n\`\`\
                 <List.Item.Detail.Metadata.Link
                   title="Declared in"
                   target={`https://github.com/NixOS/nixpkgs/blob/nixos-25.05/${searchResult.declaredIn}`}
-                  text={searchResult.declaredIn}
+                  text={searchResult.declaredIn[0]}
                 />
               )}
             </List.Item.Detail.Metadata>
@@ -91,15 +91,4 @@ ${searchResult.example ? `### Example\n\`\`\`nix\n${searchResult.example}\n\`\`\
 
 function htmlToMarkdown(html: string) {
   return turndownService.turndown(html);
-}
-
-
-export interface OptionsSearchResult {
-  id: string;
-  name: string;
-  description: string | null;
-  type: string;
-  default: string | null;
-  declaredIn: string | null;
-  example: string | null;
 }
