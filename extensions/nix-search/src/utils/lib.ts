@@ -14,6 +14,7 @@ export function useDebouncedValue<T>(value: T, delay = 300) {
 export interface Preferences {
   searchSize: string;
   branchName: string;
+  githubToken: string;
 }
 
 export interface OptionsSearchResult {

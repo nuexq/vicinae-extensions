@@ -1,68 +1,83 @@
 {
-  "$schema": "https://raw.githubusercontent.com/vicinaehq/vicinae/refs/heads/main/extra/schemas/extension.json",
-  "name": "nix-search",
-  "title": "Nix Search",
-  "description": "Quickly find nix packages and configurations options from nixpkgs, nixos and home-manager",
-  "categories": [],
-  "license": "MIT",
-  "author": "nuexq",
-  "contributors": [],
-  "pastContributors": [],
-  "icon": "nix-snowflake.png",
-  "commands": [
-    {
-      "name": "search-nixpkgs",
-      "title": "Search Nixpkgs",
-      "subtitle": "Find package info from nixpkgs repo",
-      "description": "Quickly look up nixpkgs, view metadata, maintainers, and Github source links",
-      "mode": "view"
-    },
-    {
-      "name": "search-nixos-options",
-      "title": "Search NixOS Options",
-      "subtitle": "Find NixOS configuration options and their details",
-      "description": "Quickly search and explore NixOS options, view types, default values, examples, and links to declarations in nixpkgs",
-      "mode": "view"
-    },
-    {
-      "name": "search-homeManager-options",
-      "title": "Search Home-Manager Options",
-      "subtitle": "Find Home-Manager configuration options and their details",
-      "description": "Quickly search and explore Home-Manager Options, view types, default values, examples, and links to declarations in nixpkgs",
-      "mode": "view"
-    }
-  ],
-  "preferences": [
-    {
-      "name": "searchSize",
-      "description": "Number of result which will be shown at once",
-      "type": "textfield",
-      "required": false,
-      "title": "Search result count",
-      "default": "20"
-    },
-    {
-      "name": "branchName",
-      "description": "Branch name of NixOS/nixpkgs to query against",
-      "type": "textfield",
-      "required": false,
-      "title": "NixPkgs & Home-Manager verison",
-      "default": "unstable"
-    }
-  ],
-  "scripts": {
-    "build": "vici build",
-    "dev": "vici develop",
-    "format": "biome format --write src",
-    "lint": "vici lint"
-  },
-  "dependencies": {
-    "@raycast/utils": "2.0.1",
-    "@vicinae/api": "^0.16.1"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "2.3.2",
-    "turndown": "^7.2.2",
-    "typescript": "^5.9.2"
-  }
+	"$schema": "https://raw.githubusercontent.com/vicinaehq/vicinae/refs/heads/main/extra/schemas/extension.json",
+	"name": "nix-search",
+	"title": "Nix Search",
+	"description": "Quickly find nix packages and configurations options from nixpkgs, nixos and home-manager",
+	"categories": [],
+	"license": "MIT",
+	"author": "nuexq",
+	"contributors": [],
+	"pastContributors": [],
+	"icon": "nix-snowflake.png",
+	"commands": [
+		{
+			"name": "search-nixpkgs",
+			"title": "Search Nixpkgs",
+			"subtitle": "Find package info from nixpkgs repo",
+			"description": "Quickly look up nixpkgs, view metadata, maintainers, and Github source links",
+			"mode": "view"
+		},
+		{
+			"name": "search-nixos-options",
+			"title": "Search NixOS Options",
+			"subtitle": "Find NixOS configuration options and their details",
+			"description": "Quickly search and explore NixOS options, view types, default values, examples, and links to declarations in nixpkgs",
+			"mode": "view"
+		},
+		{
+			"name": "search-homeManager-options",
+			"title": "Search Home-Manager Options",
+			"subtitle": "Find Home-Manager configuration options and their details",
+			"description": "Quickly search and explore Home-Manager Options, view types, default values, examples, and links to declarations in nixpkgs",
+			"mode": "view"
+		},
+		{
+			"name": "search-nixpkgs-pr",
+			"title": "Search Nixpkgs PRs",
+			"subtitle": "Browse and inspect Nixpkgs pull requests easily",
+			"description": "Quickly search Nixpkgs GitHub pull requests, view titles, authors, statuses...",
+			"mode": "view"
+		}
+	],
+	"preferences": [
+		{
+			"name": "searchSize",
+			"description": "Number of result which will be shown at once",
+			"type": "textfield",
+			"required": false,
+			"title": "Search result count",
+			"default": "20"
+		},
+		{
+			"name": "branchName",
+			"description": "Branch name of NixOS/nixpkgs to query against",
+			"type": "textfield",
+			"required": false,
+			"title": "NixPkgs & Home-Manager verison",
+			"default": "unstable"
+		},
+		{
+			"name": "githubToken",
+			"description": "your github token for nixpkgs PR search",
+			"type": "textfield",
+			"required": false,
+			"title": "Github Token"
+		}
+	],
+	"scripts": {
+		"build": "vici build",
+		"dev": "vici develop",
+		"format": "biome format --write src",
+		"lint": "vici lint"
+	},
+	"dependencies": {
+		"@raycast/utils": "2.0.1",
+		"@vicinae/api": "^0.16.1",
+		"lucide-react": "^0.553.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.3.2",
+		"turndown": "^7.2.2",
+		"typescript": "^5.9.2"
+	}
 }
