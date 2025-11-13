@@ -21,7 +21,7 @@ export default function SearchListItem({
 	const safeName = searchResult.name
 		.replace(/</g, "&lt;")
 		.replace(/>/g, "&gt;");
-	const markdown = `## ${safeName}\n\n${searchResult.description ? turndownService.turndown(searchResult.description) : ""}\n\n${searchResult.example ? `### Example\n\`\`\`nix\n${searchResult.example}\n\`\`\`` : ""}`;
+	const markdown = `## ${safeName}\n\n${searchResult.description ? searchResult.description : ""}\n\n${searchResult.example ? `### Example\n\`\`\`nix\n${searchResult.example}\n\`\`\`` : ""}`;
 
 	const declaredInArray = Array.isArray(searchResult.declaredIn)
 		? searchResult.declaredIn

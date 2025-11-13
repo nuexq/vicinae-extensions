@@ -1,8 +1,8 @@
-import { ActionPanel, Action, Color, List, Icon, getPreferenceValues } from "@vicinae/api";
-import { useState } from "react";
 import { URL } from "node:url";
-import { useSearch } from "./utils/search";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, List } from "@vicinae/api";
+import { useState } from "react";
 import { Preferences } from "./utils/lib";
+import { useSearch } from "./utils/search";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -53,11 +53,11 @@ function SearchListItem({ searchResult }: { searchResult: PkgsSearchResult }) {
               <List.Item.Detail.Metadata.Label title="Name" text={searchResult.name} />
               <List.Item.Detail.Metadata.Label title="Version" text={searchResult.version} />
 
-              {searchResult.homepage.map((url, idx) =>
+              {searchResult.homepage.map((url) =>
                 url ? (
-                  <List.Item.Detail.Metadata.Link key={idx} title="Homepage" target={url} text={new URL(url).host} />
+                  <List.Item.Detail.Metadata.Link key={url} title="Homepage" target={url} text={new URL(url).host} />
                 ) : (
-                  <List.Item.Detail.Metadata.Label key={idx} title="Homepage" icon={Icon.Minus} text="-" />
+                  <List.Item.Detail.Metadata.Label key={url} title="Homepage" icon={Icon.Minus} text="-" />
                 )
               )}
 
@@ -65,11 +65,11 @@ function SearchListItem({ searchResult }: { searchResult: PkgsSearchResult }) {
                 <List.Item.Detail.Metadata.Link title="Source" target={searchResult.source} text={new URL(searchResult.source).host} />
               )}
 
-              {searchResult.licenses.map((license, idx) =>
+              {searchResult.licenses.map((license) =>
                 license.url ? (
-                  <List.Item.Detail.Metadata.Link key={idx} title="License" target={license.url} text={license.name} />
+                  <List.Item.Detail.Metadata.Link key={license.name} title="License" target={license.url} text={license.name} />
                 ) : (
-                  <List.Item.Detail.Metadata.Label key={idx} title="License" text={license.name} />
+                  <List.Item.Detail.Metadata.Label key={license.name} title="License" text={license.name} />
                 )
               )}
 
