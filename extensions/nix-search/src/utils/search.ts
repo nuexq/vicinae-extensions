@@ -39,7 +39,8 @@ function buildQuery({
 }) {
   const reversed = [...text].reverse().join("");
   const fields = FIELDS[type];
-  const baseWildcard = type === "packages" ? "package_attr_name" : "option_name";
+  const baseWildcard =
+    type === "packages" ? "package_attr_name" : "option_name";
 
   const multiMatch = (query: string) => ({
     multi_match: {
@@ -56,7 +57,13 @@ function buildQuery({
     size: Math.max(1, searchSize || 10),
     query: {
       bool: {
-        filter: [{ term: { type: { value: type === "packages" ? "package" : "option" } } }],
+        filter: [
+          {
+            term: {
+              type: { value: type === "packages" ? "package" : "option" },
+            },
+          },
+        ],
         must: [
           {
             dis_max: {
@@ -80,12 +87,20 @@ function buildQuery({
     },
     sort:
       type === "packages"
-        ? [{ _score: "desc" }, { package_attr_name: "desc" }, { package_pversion: "desc" }]
+        ? [
+          { _score: "desc" },
+          { package_attr_name: "desc" },
+          { package_pversion: "desc" },
+        ]
         : [{ _score: "desc" }, { option_name: "desc" }],
   };
 }
 
-async function parseResponse(response: Response, isPackageSearch: boolean) {
+async function parseResponse(
+  response: Response,
+  isPackageSearch: boolean,
+  branchName: string,
+) {
   const json = await response.json();
   if (!response.ok || json.error || json.code) {
     throw new Error(json.message || json.error?.reason || response.statusText);
@@ -104,12 +119,21 @@ async function parseResponse(response: Response, isPackageSearch: boolean) {
         outputs: src.package_outputs,
         defaultOutput: src.package_default_output,
         platforms: src.package_platforms.filter((p: string) =>
-          ["x86_64-linux", "aarch64-linux", "i686-linux", "x86_64-darwin", "aarch64-darwin"].includes(p)
+          [
+            "x86_64-linux",
+            "aarch64-linux",
+            "i686-linux",
+            "x86_64-darwin",
+            "aarch64-darwin",
+          ].includes(p),
         ),
         source:
           src.package_position &&
-          `https://github.com/NixOS/nixpkgs/blob/unstable/${src.package_position.replace(/:([0-9]+)$/, "")}`,
-        licenses: (src.package_license_set || []).map((name: string) => ({ name, url: null })),
+          `https://github.com/NixOS/nixpkgs/blob/${branchName === "unstable" ? "master" : `release-${branchName}`}/${src.package_position.replace(/:([0-9]+)$/, "")}`,
+        licenses: (src.package_license_set || []).map((name: string) => ({
+          name,
+          url: null,
+        })),
       };
     }
 
@@ -154,7 +178,7 @@ export function useSearch({
       "Content-Type": "application/json",
     },
     body: JSON.stringify(query),
-    parseResponse: (r) => parseResponse(r, type === "packages"),
+    parseResponse: (r) => parseResponse(r, type === "packages", branchName),
     initialData: [],
     execute: debounced.trim().length >= 2,
     failureToastOptions: { title: "Could not perform search" },
