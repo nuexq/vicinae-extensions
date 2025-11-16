@@ -185,7 +185,7 @@ function PrDetailView({
   return (
     <Detail
       navigationTitle={`PR #${data.number}`}
-      markdown={`\`NixOS:${data.to_branch}\` ← \`${data.username}:${data.from_branch}\`\n\nCreated at: ${new Date(data.created_at).toLocaleString()}, Updated ${moment(data.updated_at).fromNow()}\n# ${data.title}\n\n${data.body || "_No description provided._"}`}
+      markdown={`\`NixOS:${data.to_branch}\` ← \`${data.username}:${data.from_branch}\`\n# ${data.title}\n*Created at: ${new Date(data.created_at).toLocaleString()}, Updated ${moment(data.updated_at).fromNow()}*\n\n${data.body || "_No description provided._"}`}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Link
