@@ -1,5 +1,6 @@
 import { useFetch } from "@raycast/utils";
 import { useDebouncedValue } from "./lib";
+import { OptionsSearchResult } from "../search-options";
 
 type SearchType = "packages" | "options";
 
@@ -100,7 +101,7 @@ async function parseResponse(
   response: Response,
   isPackageSearch: boolean,
   branchName: string,
-) {
+): Promise<OptionsSearchResult[]> {
   const json = await response.json();
   if (!response.ok || json.error || json.code) {
     throw new Error(json.message || json.error?.reason || response.statusText);
@@ -155,20 +156,20 @@ export function useSearch({
   type,
   searchSize,
   branchName,
+  enabled = true,
 }: {
   searchText: string;
   type: SearchType;
   searchSize: number;
   branchName: string;
+  enabled?: boolean;
 }) {
-  const debounced = useDebouncedValue(searchText, 300);
-
   const query = buildQuery({
-    text: debounced,
+    text: searchText,
     type,
     searchSize,
   });
-
+  const debounced = useDebouncedValue(searchText, 300);
   const url = `https://search.nixos.org/backend/latest-44-nixos-${branchName}/_search`;
 
   const { isLoading, data } = useFetch(url, {
@@ -180,9 +181,9 @@ export function useSearch({
     body: JSON.stringify(query),
     parseResponse: (r) => parseResponse(r, type === "packages", branchName),
     initialData: [],
-    execute: debounced.trim().length >= 2,
+    execute: enabled && debounced.trim().length >= 2,
     failureToastOptions: { title: "Could not perform search" },
   });
 
-  return { isLoading, results: debounced ? data : [] };
+  return { isLoading, results: enabled && debounced ? data : [] };
 }

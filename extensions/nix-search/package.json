@@ -18,24 +18,17 @@
       "mode": "view"
     },
     {
-      "name": "search-nixos-options",
-      "title": "Search NixOS Options",
-      "subtitle": "Find NixOS configuration options and their details",
-      "description": "Quickly search and explore NixOS options, view types, default values, examples, and links to declarations in nixpkgs",
-      "mode": "view"
-    },
-    {
-      "name": "search-homeManager-options",
-      "title": "Search Home-Manager Options",
-      "subtitle": "Find Home-Manager configuration options and their details",
-      "description": "Quickly search and explore Home-Manager Options, view types, default values, examples, and links to declarations in nixpkgs",
+      "name": "search-options",
+      "title": "Search NixOS/Home-Manager Options",
+      "subtitle": "Find NixOS and Home-Manager configuration options and their details",
+      "description": "Quickly search and explore NixOS and Home-Manager Options, view types, default values, examples, and links to declarations",
       "mode": "view"
     },
     {
       "name": "search-nixpkgs-pr",
       "title": "Search Nixpkgs PRs",
       "subtitle": "Browse and inspect Nixpkgs pull requests easily",
-      "description": "Quickly search Nixpkgs GitHub pull requests, view titles, authors, statuses...",
+      "description": "Quickly search Nixpkgs GitHub pull requests, authors, statuses...",
       "mode": "view",
       "arguments": [
         {
