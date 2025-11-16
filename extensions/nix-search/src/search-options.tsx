@@ -1,12 +1,12 @@
-import { getPreferenceValues, List, Action, ActionPanel } from "@vicinae/api";
+import { Action, ActionPanel, getPreferenceValues, List } from "@vicinae/api";
 import { useMemo, useState } from "react";
 import TurndownService from "turndown";
-import { useSearch } from "./utils/search";
 import {
-  useRawHomeManagerOptions,
   useFilteredHomeManagerOptions,
+  useRawHomeManagerOptions,
 } from "./utils/homeManager";
-import { type Preferences } from "./utils/lib";
+import type { Preferences } from "./utils/lib";
+import { useSearch } from "./utils/search";
 
 type Source = "nixos" | "home-manager";
 

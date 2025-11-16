@@ -8,14 +8,14 @@ import {
   List,
 } from "@vicinae/api";
 import { useState } from "react";
-import { Preferences } from "./utils/lib";
+import type { Preferences } from "./utils/lib";
 import { useSearch } from "./utils/search";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const { searchSize, branchName } = getPreferenceValues<Preferences>();
   const { isLoading, results } = useSearch({
-    searchText
+    searchText,
     type: "packages",
     searchSize: Number(searchSize),
     branchName,
@@ -36,123 +36,127 @@ export default function Command() {
       </List.Section>
     </List>
   );
-}
 
-function SearchListItem({ searchResult }: { searchResult: PkgsSearchResult }) {
-  return (
-    <List.Item
-      title={searchResult.attrName}
-      actions={
-        <ActionPanel>
-          <ActionPanel.Section>
-            <Action.CopyToClipboard
-              title="Copy Package Attr Name"
-              content={searchResult.attrName}
-            />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            {searchResult.homepage[0] && (
-              <Action.OpenInBrowser
-                title="Open Package Homepage"
-                url={searchResult.homepage[0]}
-                shortcut={{ modifiers: ["cmd"], key: "o" }}
+  function SearchListItem({
+    searchResult,
+  }: {
+    searchResult: PkgsSearchResult;
+  }) {
+    return (
+      <List.Item
+        title={searchResult.attrName}
+        actions={
+          <ActionPanel>
+            <ActionPanel.Section>
+              <Action.CopyToClipboard
+                title="Copy Package Attr Name"
+                content={searchResult.attrName}
               />
-            )}
-            {searchResult.source && (
-              <Action.OpenInBrowser
-                title="Open Package Source Code"
-                url={searchResult.source}
-                shortcut={{ modifiers: ["cmd"], key: "return" }}
-              />
-            )}
-          </ActionPanel.Section>
-        </ActionPanel>
-      }
-      detail={
-        <List.Item.Detail
-          markdown={`## ${searchResult.attrName}\n\n${searchResult.description ? searchResult.description : ""}`}
-          metadata={
-            <List.Item.Detail.Metadata>
-              <List.Item.Detail.Metadata.Label
-                title="Name"
-                text={searchResult.name}
-              />
-              <List.Item.Detail.Metadata.Label
-                title="Version"
-                text={searchResult.version}
-              />
-
-              {searchResult.homepage.map((url) =>
-                url ? (
-                  <List.Item.Detail.Metadata.Link
-                    key={url}
-                    title="Homepage"
-                    target={url}
-                    text={new URL(url).host}
-                  />
-                ) : (
-                  <List.Item.Detail.Metadata.Label
-                    key={url}
-                    title="Homepage"
-                    icon={Icon.Minus}
-                    text="-"
-                  />
-                ),
-              )}
-
-              {searchResult.source && (
-                <List.Item.Detail.Metadata.Link
-                  title="Source"
-                  target={searchResult.source}
-                  text={new URL(searchResult.source).host}
+            </ActionPanel.Section>
+            <ActionPanel.Section>
+              {searchResult.homepage[0] && (
+                <Action.OpenInBrowser
+                  title="Open Package Homepage"
+                  url={searchResult.homepage[0]}
+                  shortcut={{ modifiers: ["cmd"], key: "o" }}
                 />
               )}
-
-              {searchResult.licenses.map((license) =>
-                license.url ? (
-                  <List.Item.Detail.Metadata.Link
-                    key={license.name}
-                    title="License"
-                    target={license.url}
-                    text={license.name}
-                  />
-                ) : (
-                  <List.Item.Detail.Metadata.Label
-                    key={license.name}
-                    title="License"
-                    text={license.name}
-                  />
-                ),
+              {searchResult.source && (
+                <Action.OpenInBrowser
+                  title="Open Package Source Code"
+                  url={searchResult.source}
+                  shortcut={{ modifiers: ["cmd"], key: "return" }}
+                />
               )}
+            </ActionPanel.Section>
+          </ActionPanel>
+        }
+        detail={
+          <List.Item.Detail
+            markdown={`## ${searchResult.attrName}\n\n${searchResult.description ? searchResult.description : ""}`}
+            metadata={
+              <List.Item.Detail.Metadata>
+                <List.Item.Detail.Metadata.Label
+                  title="Name"
+                  text={searchResult.name}
+                />
+                <List.Item.Detail.Metadata.Label
+                  title="Version"
+                  text={searchResult.version}
+                />
 
-              <List.Item.Detail.Metadata.TagList title="Outputs">
-                {searchResult.outputs.map((text) => (
-                  <List.Item.Detail.Metadata.TagList.Item
-                    key={text}
-                    text={text}
-                    color={
-                      text === searchResult.defaultOutput
-                        ? Color.PrimaryText
-                        : Color.SecondaryText
-                    }
-                  />
-                ))}
-              </List.Item.Detail.Metadata.TagList>
+                {searchResult.homepage.map((url) =>
+                  url ? (
+                    <List.Item.Detail.Metadata.Link
+                      key={url}
+                      title="Homepage"
+                      target={url}
+                      text={new URL(url).host}
+                    />
+                  ) : (
+                    <List.Item.Detail.Metadata.Label
+                      key={url}
+                      title="Homepage"
+                      icon={Icon.Minus}
+                      text="-"
+                    />
+                  ),
+                )}
 
-              <List.Item.Detail.Metadata.TagList title="Platforms">
-                {searchResult.platforms.map((text) => (
-                  <List.Item.Detail.Metadata.TagList.Item
-                    key={text}
-                    text={text}
+                {searchResult.source && (
+                  <List.Item.Detail.Metadata.Link
+                    title="Source"
+                    target={searchResult.source}
+                    text={new URL(searchResult.source).host}
                   />
-                ))}
-              </List.Item.Detail.Metadata.TagList>
-            </List.Item.Detail.Metadata>
-          }
-        />
-      }
-    />
-  );
+                )}
+
+                {searchResult.licenses.map((license) =>
+                  license.url ? (
+                    <List.Item.Detail.Metadata.Link
+                      key={license.name}
+                      title="License"
+                      target={license.url}
+                      text={license.name}
+                    />
+                  ) : (
+                    <List.Item.Detail.Metadata.Label
+                      key={license.name}
+                      title="License"
+                      text={license.name}
+                    />
+                  ),
+                )}
+
+                <List.Item.Detail.Metadata.TagList title="Outputs">
+                  {searchResult.outputs.map((text) => (
+                    <List.Item.Detail.Metadata.TagList.Item
+                      key={text}
+                      text={text}
+                      color={
+                        text === searchResult.defaultOutput
+                          ? Color.PrimaryText
+                          : Color.SecondaryText
+                      }
+                    />
+                  ))}
+                </List.Item.Detail.Metadata.TagList>
+
+                <List.Item.Detail.Metadata.TagList title="Platforms">
+                  {searchResult.platforms.map((text) => (
+                    <List.Item.Detail.Metadata.TagList.Item
+                      key={text}
+                      text={text}
+                    />
+                  ))}
+                </List.Item.Detail.Metadata.TagList>
+              </List.Item.Detail.Metadata>
+            }
+          />
+        }
+      />
+    );
+  }
 }
 
 export interface PkgsSearchResult {

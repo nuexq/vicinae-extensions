@@ -101,7 +101,7 @@ async function parseResponse(
   response: Response,
   isPackageSearch: boolean,
   branchName: string,
-): Promise<OptionsSearchResult[]> {
+) {
   const json = await response.json();
   if (!response.ok || json.error || json.code) {
     throw new Error(json.message || json.error?.reason || response.statusText);
